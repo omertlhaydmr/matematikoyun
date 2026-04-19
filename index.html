@@ -984,501 +984,1661 @@ const SFX = {
 // ══════════════════════════════════════════════
 const GENS = [
 
-  // ─── 1. İşlem Önceliği ───────────────────────
+  // ─────────────────────────────────────────────────────────────────
+  // 1. Tema: Sayılar ve Nicelikler
+  // ─────────────────────────────────────────────────────────────────
+ [
+  // 1. Çarpanlar
   {
-    topic:"İşlem Önceliği",
-    gen(){
-      const form = rnd(0,1);
-      let text, correct;
-      if(form===0){
-        // a + b×c
-        const a=rnd(2,9), b=rnd(2,5), c=rnd(2,5);
-        correct = a + b*c;
-        text = `${a} + ${b} × ${c} işleminin sonucu kaçtır?`;
-      } else {
-        // a×b - c veya a×b + c
-        const a=rnd(2,6), b=rnd(2,6), c=rnd(1,10);
-        const op = Math.random()>.5?'+':'-';
-        correct = op==='+'? a*b+c : a*b-c;
-        if(correct<=0) return this.gen();
-        text = `${a} × ${b} ${op} ${c} işleminin sonucu kaçtır?`;
-      }
-      const wrongs = genWrong(correct,3,{min:1,step:pick([1,2,5])});
-      return {topic:this.topic, text, correct:String(correct), wrongs:wrongs.map(String)};
-    }
-  },
+    topic: "Çarpanlar",
+    gen() {
+    // 1 ile 200 arasında rastgele bir sayı seç
+    const n = Math.floor(Math.random() * 200) + 1;
+    let factors = [];
 
-  // ─── 2. Üslü İfadeler ───────────────────────
-  {
-    topic:"Üslü İfadeler",
-    gen(){
-      const pairs = [
-        [2,2,4],[3,2,9],[4,2,16],[5,2,25],[6,2,36],[7,2,49],[8,2,64],[9,2,81],[10,2,100],
-        [2,3,8],[3,3,27],[4,3,64],[2,4,16],[3,4,81],[5,3,125],[10,3,1000]
-      ];
-      const [base,exp,correct] = pick(pairs);
-      const wrongs = genWrong(correct,3,{min:1,step:pick([base,exp,correct/2>0?Math.floor(correct/2):1])});
-      return {
-        topic:this.topic,
-        text:`<span style="font-size:1.2em">${base}<sup>${exp}</sup></span> ifadesinin değeri kaçtır?`,
-        correct:String(correct), wrongs:wrongs.map(String)
-      };
-    }
-  },
-
-  // ─── 3. EBOB ────────────────────────────────
-  {
-    topic:"En Büyük Ortak Bölen (EBOB)",
-    gen(){
-      const pairs = [
-        [12,18,6],[10,15,5],[8,12,4],[6,9,3],[14,21,7],
-        [20,30,10],[16,24,8],[9,12,3],[15,25,5],[18,24,6],
-        [4,8,4],[6,12,6],[10,20,10],[8,16,8],[12,16,4]
-      ];
-      const [a,b,ebob] = pick(pairs);
-      const wrongs = genWrong(ebob,3,{min:1,max:Math.min(a,b),step:1}).filter(w=>w!==ebob&&w>0);
-      return {
-        topic:this.topic,
-        text:`${a} ve ${b} sayılarının EBOB'u kaçtır?`,
-        correct:String(ebob), wrongs:wrongs.slice(0,3).map(String)
-      };
-    }
-  },
-
-  // ─── 4. EKOK ────────────────────────────────
-  {
-    topic:"En Küçük Ortak Kat (EKOK)",
-    gen(){
-      const pairs = [
-        [2,3,6],[3,4,12],[4,6,12],[2,5,10],[3,5,15],
-        [4,5,20],[2,7,14],[3,8,24],[5,6,30],[2,9,18],
-        [4,10,20],[3,6,6],[6,8,24],[5,10,10],[2,4,4]
-      ];
-      const [a,b,ekok] = pick(pairs);
-      const wrongs = genWrong(ekok,3,{min:Math.max(a,b),step:pick([a,b])}).filter(w=>w!==ekok&&w>0);
-      return {
-        topic:this.topic,
-        text:`${a} ve ${b} sayılarının EKOK'u kaçtır?`,
-        correct:String(ekok), wrongs:wrongs.slice(0,3).map(String)
-      };
-    }
-  },
-
-  // ─── 5. Bölünebilme Kuralları ───────────────
-  {
-    topic:"Bölünebilme Kuralları",
-    gen(){
-      const configs = [
-        {div:2, suffix:"ye", c:[12,24,36,48,56,72,84,96,108,150], w:[13,25,37,49,57,73,85,97,109,151]},
-        {div:3, suffix:"e",  c:[12,21,33,45,57,99,111,123,222,333], w:[13,22,34,46,58,100,112,124,223,334]},
-        {div:5, suffix:"e",  c:[15,25,35,45,55,65,75,85,95,105], w:[13,22,34,46,53,64,76,83,94,107]},
-        {div:10,suffix:"a",  c:[20,30,50,70,90,100,120,150,200,300], w:[21,31,51,71,91,101,121,151,201,301]},
-        {div:4, suffix:"e",  c:[12,16,20,24,28,32,36,40,44,48], w:[13,17,21,25,29,33,37,41,45,49]},
-        {div:9, suffix:"a",  c:[18,27,36,45,54,63,72,81,90,99], w:[17,26,35,44,53,62,71,80,91,98]},
-      ];
-      const cfg = pick(configs);
-      const correct = pick(cfg.c);
-      const wrongs = shuffle(cfg.w).slice(0,3);
-      return {
-        topic:this.topic,
-        text:`Aşağıdaki sayılardan hangisi <strong style='color:#fde047'>${cfg.div}</strong>'${cfg.suffix} tam bölünür?`,
-        correct:String(correct), wrongs:wrongs.map(String)
-      };
-    }
-  },
-
-  // ─── 6. Asal Sayı & Çarpan ──
-  {
-    topic:"Asal Sayılar ve Çarpanlar",
-    gen(){
-      const form = rnd(0,1);
-      if(form===0){
-        const pool = [
-          {p:7,  w:[6,8,9]},{p:11,w:[10,12,15]},{p:13,w:[12,14,15]},
-          {p:17,w:[15,18,21]},{p:19,w:[18,20,21]},{p:23,w:[21,22,24]},
-          {p:29,w:[27,28,30]},{p:31,w:[30,32,33]},{p:37,w:[35,36,38]},
-          {p:41,w:[39,40,42]},{p:43,w:[42,44,45]},{p:47,w:[45,46,48]}
-        ];
-        const {p,w} = pick(pool);
-        return {
-          topic:this.topic,
-          text:"Aşağıdakilerden hangisi bir <strong style='color:#fde047'>asal sayı</strong>dır?",
-          correct:String(p), wrongs:w.map(String)
-        };
-      } else {
-        const pool=[
-          {n:12,p:7,w:[2,3,4]},{n:18,p:11,w:[2,3,6]},{n:20,p:9,w:[2,4,5]},
-          {n:15,p:7,w:[1,3,5]},{n:24,p:11,w:[3,4,6]},{n:30,p:7,w:[3,5,6]}
-        ];
-        const {n,p,w} = pick(pool);
-        return {
-          topic:this.topic,
-          text:`Aşağıdakilerden hangisi <strong>${n}</strong> sayısının çarpanı <strong style='color:#f87171'>değildir</strong>?`,
-          correct:String(p), wrongs:w.map(String)
-        };
+    // Çarpanları bul (1 ve n hariç)
+    for (let i = 2; i <= Math.sqrt(n); i++) {
+      if (n % i === 0) {
+        factors.push(i);
+        if (i !== n / i) factors.push(n / i);
       }
     }
-  },
 
-  // ─── 7. Aritmetik Ortalama ───────────────────
-  {
-    topic:"İstatistik: Ortalama",
-    gen(){
-      const sets = [
-        [10,20,30], [20,40,60], [30,50,70], [10,30,50], [40,60,80],
-        [20,60,100], [10,50,90], [50,70,90], [60,80,100], [20,40,60,80],
-        [10,20,30,40], [20,30,40], [10,40,70], [30,60,90]
-      ].filter(arr=>{ const s=arr.reduce((a,b)=>a+b,0); return s%arr.length===0 && s/arr.length%10===0; });
-      const nums = pick(sets);
-      const avg = nums.reduce((a,b)=>a+b,0)/nums.length;
-      const wrongs = genWrong(avg,3,{min:10,max:100,step:10});
-      return {
-        topic:this.topic,
-        text:`<span style='color:#fde047'>${nums.join(", ")}</span><br>Bu sayıların aritmetik ortalaması kaçtır?`,
-        correct:String(avg), wrongs:wrongs.map(String)
-      };
-    }
-  },
+    // Eğer sayı asalsa veya çarpanı yoksa (1 gibi) tekrar dene
+    if (factors.length === 0) return this.gen();
 
-  // ─── 8. Veri Analizi – Açıklık ──────────────
-  {
-    topic:"Veri Analizi: Açıklık",
-    gen(){
-      const sets = [
-        [3,7,12,18], [5,8,11,20], [2,6,9,14], [4,7,13,16], [1,5,8,11],
-        [3,6,9,13], [10,15,20,30], [8,12,16,24], [5,10,15,25], [6,9,12,18],
-        [2,5,8,12], [4,8,12,20]
-      ];
-      const arr = pick(sets);
-      const mn = Math.min(...arr), mx = Math.max(...arr);
-      const range = mx-mn;
-      const data = shuffle([...arr]);
-      const wrongs = genWrong(range,3,{min:1,step:pick([2,3,5])});
-      return {
-        topic:this.topic,
-        text:`<span style='color:#fde047'>${data.join(", ")}</span><br>Bu veri grubunun açıklığı kaçtır?`,
-        correct:String(range), wrongs:wrongs.map(String)
-      };
-    }
-  },
+    // Doğru cevabı rastgele bir çarpan seç
+    const correct = factors[Math.floor(Math.random() * factors.length)];
 
-  // ─── 9. Kesirler: Toplama/Çıkarma ───────────
-  {
-    topic:"Kesirlerle İşlemler",
-    gen(){
-      const cases = [
-        [1,2,4,'+',"3/4"],   [2,1,4,'-',"1/4"],
-        [1,3,5,'+',"4/5"],   [3,1,5,'-',"2/5"],
-        [2,3,8,'+',"5/8"],   [3,2,8,'-',"1/8"],
-        [1,4,6,'+',"5/6"],   [4,1,6,'-',"1/2"],
-        [3,4,10,'+',"7/10"], [4,3,10,'-',"1/10"],
-        [2,4,6,'+',"1"],     [5,2,6,'-',"1/2"],
-        [1,1,3,'+',"2/3"],   [2,1,3,'-',"1/3"],
-        [3,5,8,'+',"1"],     [5,3,8,'-',"1/4"],
-        [1,2,6,'+',"1/2"],   [2,3,5,'+',"1"]
-      ];
-      const c = pick(cases);
-      const [n1,n2,den,op,ans] = c;
-      return {
-        topic:this.topic,
-        text:`<span style='font-size:1.2em'><sup>${n1}</sup>/<sub>${den}</sub> ${op} <sup>${n2}</sup>/<sub>${den}</sub></span> = ?`,
-        correct:ans,
-        wrongs: (() => {
-          const w = new Set();
-          const dens=[den,den+1,den-1].filter(d=>d>1);
-          for(const d of dens){
-            for(const n of [n1+n2-1,n1+n2+1,Math.abs(n1-n2)+1]){
-              if(n>0){
-                const g=computeGCD(n,d); const str=d/g===1?String(n/g):`${n/g}/${d/g}`;
-                if(str!==ans) w.add(str);
-              }
-              if(w.size>=3) break;
-            }
-            if(w.size>=3) break;
-          }
-          while(w.size<3) w.add(`${w.size+1}/${den}`);
-          return [...w].slice(0,3);
-        })()
-      };
-    }
-  },
-
-  // ─── 10. Mutlak Değer ───
-  {
-    topic:"Mutlak Değer",
-    gen(){
-      const qs = [
-        {t:"<strong>|-5|</strong> ifadesinin değeri kaçtır?", c:"5", w:["-5","0","1"]},
-        {t:"<strong>|12|</strong> ifadesinin değeri kaçtır?", c:"12", w:["-12","0","1"]},
-        {t:"Aşağıdaki eşitliklerden hangisi <strong>yanlıştır</strong>?", c:"|-3| = -3", w:["|-4| = 4","|0| = 0","|7| = 7"]},
-        {t:"<strong>|-8|</strong> ile <strong>|3|</strong> sayılarının toplamı kaçtır?", c:"11", w:["-5","5","-11"]},
-        {t:"Mutlak değeri <strong>5</strong> olan sayılar hangileridir?", c:"-5 ve 5", w:["Sadece 5","Sadece -5","0 ve 5"]},
-        {t:"Aşağıdaki sayılardan hangisinin mutlak değeri en küçüktür?", c:"0", w:["-1","-5","2"]}
-      ];
-      const q = pick(qs);
-      return {topic:this.topic, text:q.t, correct:q.c, wrongs:q.w};
-    }
-  },
-
-  // ─── 11. Açılar ─────────────────────────────
-  {
-    topic:"Açılar: Tümler ve Bütünler",
-    gen(){
-      const type = rnd(0,1);
-      if(type===0){
-        const a = rnd(1,17)*5;
-        const comp = 90-a;
-        const wrongs = [comp+5, comp-5>0?comp-5:comp+10, comp+10].filter(w=>w>0&&w<90&&w!==comp);
-        while(wrongs.length<3) wrongs.push(comp+wrongs.length*5+5);
-        return {
-          topic:this.topic,
-          text:`<strong>${a}°</strong> açısının <span style='color:#a5f3fc'>tümler açısı</span> kaç derecedir?`,
-          correct:String(comp), wrongs:wrongs.slice(0,3).map(String)
-        };
-      } else {
-        const a = rnd(1,35)*5;
-        const supp = 180-a;
-        const wrongs = [supp+5, supp-5>0?supp-5:supp+10, supp+10].filter(w=>w>0&&w<180&&w!==supp);
-        while(wrongs.length<3) wrongs.push(supp+wrongs.length*5+5);
-        return {
-          topic:this.topic,
-          text:`<strong>${a}°</strong> açısının <span style='color:#fde047'>bütünler açısı</span> kaç derecedir?`,
-          correct:String(supp), wrongs:wrongs.slice(0,3).map(String)
-        };
+    // Çeldiricileri oluştur
+    let wrongs = new Set();
+    
+    // Klasik çeldiriciler
+    wrongs.add(n + 1); // Sayının bir fazlası
+    
+    while (wrongs.size < 3) {
+      // Sayıyı tam bölmeyen, 1 ile n+5 arasında rastgele sayılar
+      let cand = Math.floor(Math.random() * (n + 5)) + 2;
+      
+      if (n % cand !== 0 && cand !== correct) {
+        wrongs.add(cand);
       }
     }
-  },
 
-  // ─── 12. Üçgenin Açıları ─────────────────────
+    return {
+      topic: this.topic,
+      text: `Aşağıdakilerden hangisi <strong>${n}</strong> sayısının bir <strong>çarpanıdır</strong>?`,
+      correct: String(correct),
+      wrongs: Array.from(wrongs).slice(0, 3).map(String)
+    };
+   }
+  },
+  // 2. Katlar
   {
-    topic:"Üçgenin Açıları",
-    gen(){
-      for(let i=0;i<20;i++){
-        const a = rnd(4,14)*10;
-        const b = rnd(2,8)*10;
-        const c = 180-a-b;
-        if(c>=10 && c%5===0 && c<180){
-          const wrongs = [c+5, c-5>0?c-5:c+10, c+10].filter(w=>w>0&&w<180&&w!==c);
-          while(wrongs.length<3) wrongs.push(c+wrongs.length*5);
-          return {
-            topic:this.topic,
-            text:`İç açıları <strong>${a}°</strong> ve <strong>${b}°</strong> olan üçgenin üçüncü açısı kaçtır?`,
-            correct:String(c), wrongs:wrongs.slice(0,3).map(String)
-          };
-        }
+    topic: "Katlar",
+    gen() {
+      const base = rnd(7, 15);
+      const mult1 = rnd(3, 8);
+      const correct = base * mult1;
+      
+      // Çeldiriciler: Katı gibi görünen ama tam bölünmeyen sayılar (işlem hatası simülasyonu)
+      const wrongsSet = new Set();
+      wrongsSet.add(correct + 2); // Son rakamı yanıltıcı
+      wrongsSet.add(correct - 1); 
+      wrongsSet.add(base * (mult1 + 1) - 3); 
+      
+      while (wrongsSet.size < 3) {
+        let cand = base * rnd(3, 8) + rnd(1, base - 1);
+        if (cand !== correct && cand % base !== 0) wrongsSet.add(cand);
       }
-      return {
-        topic:this.topic,
-        text:`İç açıları <strong>60°</strong> ve <strong>80°</strong> olan üçgenin üçüncü açısı kaçtır?`,
-        correct:"40", wrongs:["30","50","45"]
-      };
-    }
-  },
-
-  // ─── 13. Sayı Örüntüleri ─────────────────────
-  {
-    topic:"Sayı Örüntüleri",
-    gen(){
-      const start = rnd(2,10);
-      const diff  = rnd(3,8);
-      const terms = [start, start+diff, start+diff*2, start+diff*3];
-      const ans   = start+diff*4;
-      const wrongs = [ans-diff, ans+diff, ans+1].filter(w=>w>0&&w!==ans);
-      while(wrongs.length<3) wrongs.push(ans+wrongs.length+2);
-      return {
-        topic:this.topic,
-        text:`<span style='color:#fde047;font-size:1.1em'>${terms.join(" , ")} , <strong>?</strong></span><br>Örüntünün 5. terimi kaçtır?`,
-        correct:String(ans), wrongs:wrongs.slice(0,3).map(String)
-      };
-    }
-  },
-
-  // ─── 14. Alan Ölçme ──────────────────────────
-  {
-    topic:"Alan Ölçme",
-    gen(){
-      const shape = rnd(0,2);
-      if(shape===0){
-        const en = rnd(2,10), boy = rnd(2,10);
-        const area = en*boy;
-        const wrongs = genWrong(area,3,{min:1,step:pick([en,boy])});
-        return {
-          topic:this.topic,
-          text:`<strong>${en} cm × ${boy} cm</strong> ölçülerindeki dikdörtgenin alanı kaç cm²'dir?`,
-          correct:String(area), wrongs:wrongs.map(String)
-        };
-      } else if(shape===1){
-        const taban = rnd(2,8)*2, yuk = rnd(2,8)*2;
-        const area = (taban*yuk)/2;
-        const wrongs = [taban*yuk, area+taban, area-2>0?area-2:area+4].filter(w=>w!==area&&w>0);
-        return {
-          topic:this.topic,
-          text:`Taban <strong>${taban} cm</strong>, yükseklik <strong>${yuk} cm</strong> olan üçgenin alanı kaç cm²?`,
-          correct:String(area), wrongs:wrongs.map(String)
-        };
-      } else {
-        const side = rnd(3,12);
-        const area = side*side;
-        const wrongs = genWrong(area,3,{min:1,step:side});
-        return {
-          topic:this.topic,
-          text:`Bir kenar uzunluğu <strong>${side} cm</strong> olan karenin alanı kaç cm²'dir?`,
-          correct:String(area), wrongs:wrongs.map(String)
-        };
-      }
-    }
-  },
-
-  // ─── 15. Ondalık Sayılar ────────────────────
-  {
-    topic:"Ondalık Sayılar",
-    gen(){
-      const cases = [
-        {t:"<strong>2,5</strong> × 10 = ?", c:"25", w:["2,5","250","0,25"]},
-        {t:"<strong>3,7</strong> × 10 = ?", c:"37", w:["3,7","370","0,37"]},
-        {t:"<strong>4,8</strong> × 10 = ?", c:"48", w:["4,8","480","0,48"]},
-        {t:"<strong>1,2</strong> × 10 = ?", c:"12", w:["1,2","120","0,12"]},
-        {t:"<strong>46</strong> ÷ 10 = ?", c:"4,6", w:["46","0,46","460"]},
-        {t:"<strong>73</strong> ÷ 10 = ?", c:"7,3", w:["73","0,73","730"]},
-        {t:"<strong>85</strong> ÷ 10 = ?", c:"8,5", w:["85","0,85","850"]},
-        {t:"<strong>120</strong> ÷ 10 = ?", c:"12", w:["1,2","1200","120"]},
-        {t:"<strong>0,4</strong> × 10 = ?", c:"4",  w:["0,04","40","0,4"]},
-        {t:"<strong>1,5</strong> × 100 = ?", c:"150",w:["15","1500","0,15"]},
-        {t:"<strong>300</strong> ÷ 100 = ?", c:"3",  w:["30","0,3","3000"]},
-      ];
-      const q = pick(cases);
-      return {topic:this.topic, text:q.t, correct:q.c, wrongs:q.w};
-    }
-  },
-
-  // ─── 16. Cebirsel İfadeler ───────────────────
-  {
-    topic:"Cebirsel İfadeler",
-    gen(){
-      const x    = rnd(2,6);
-      const coef = rnd(2,5);
-      const add  = rnd(1,10);
-      const ans  = coef*x + add;
-      const wrongs = [ans+coef, ans-coef>0?ans-coef:ans+1, ans+1].filter(w=>w!==ans&&w>0);
-      while(wrongs.length<3) wrongs.push(ans+wrongs.length+2);
-      return {
-        topic:this.topic,
-        text:`<strong style='color:#93c5fd'>x = ${x}</strong> ise <strong>${coef}x + ${add}</strong> ifadesinin değeri kaçtır?`,
-        correct:String(ans), wrongs:wrongs.slice(0,3).map(String)
-      };
-    }
-  },
-
-  // ─── 17. Çember & Daire ──────────────────────
-  {
-    topic:"Çember ve Daire",
-    gen(){
-      const type = rnd(0,1);
-      const r = rnd(2,12);
-      const d = r*2;
-      if(type===0){
-        return {
-          topic:this.topic,
-          text:`Yarıçapı <strong>${r} cm</strong> olan çemberin çapı kaç cm'dir?`,
-          correct:String(d), wrongs:[String(r), String(d+2), String(d-2)].filter(w=>w!==String(d))
-        };
-      } else {
-        return {
-          topic:this.topic,
-          text:`Çapı <strong>${d} cm</strong> olan çemberin yarıçapı kaç cm'dir?`,
-          correct:String(r), wrongs:[String(d), String(r+1), String(r-1>0?r-1:r+2)].filter(w=>w!==String(r))
-        };
-      }
-    }
-  },
-
-  // ─── 18. Dört İşlem ──────────────────────────
-  {
-    topic:"Dört İşlem",
-    gen(){
-      const form = rnd(0,3);
-      let text, correct;
-      if(form===0){
-        const a=rnd(2,9),b=rnd(2,9);
-        correct=a*b; text=`${a} × ${b} = ?`;
-      } else if(form===1){
-        const b=rnd(2,9),c=rnd(2,9),a=b*c;
-        correct=c; text=`${a} ÷ ${b} = ?`;
-      } else if(form===2){
-        const a=rnd(30,150),b=rnd(10,80);
-        correct=a+b; text=`${a} + ${b} = ?`;
-      } else {
-        const a=rnd(50,200),b=rnd(10,80);
-        correct=a-b; text=`${a} − ${b} = ?`;
-        if(correct<=0) return this.gen();
-      }
-      const wrongs = genWrong(correct,3,{min:1,step:pick([1,2,5,10])});
-      return {topic:this.topic, text, correct:String(correct), wrongs:wrongs.map(String)};
-    }
-  },
-
-  // ─── 19. Kesirleri Karşılaştırma (YENİLENMİŞ) ───
-  {
-    topic:"Kesirleri Karşılaştırma",
-    gen(){
-      const type = rnd(0,1); // 0 = Paydalar eşit, 1 = Paylar eşit
-      let fractions = [];
-
-      if(type === 0){
-        // Paydalar eşit
-        const den = pick([5, 7, 8, 9, 11, 13, 15]);
-        const nums = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14]).filter(n => n < den).slice(0, 4);
-        nums.sort((a,b) => a - b);
-        fractions = nums.map(n => ({ s: `<sup>${n}</sup>/<sub>${den}</sub>`, v: n/den }));
-      } else {
-        // Paylar eşit
-        const num = pick([2, 3, 4, 5, 7]);
-        const dens = shuffle([3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15]).filter(d => d > num).slice(0, 4);
-        // Büyük payda = küçük değer (küçükten büyüğe sıralamak için ters sıralıyoruz)
-        dens.sort((a,b) => b - a); 
-        fractions = dens.map(d => ({ s: `<sup>${num}</sup>/<sub>${d}</sub>`, v: num/d }));
-      }
-
-      const askMax = rnd(0,1); // 1 = en büyüğü sor, 0 = en küçüğü sor
-      let correctObj, questionWord;
-
-      if(askMax === 1){
-        correctObj = fractions[3];
-        questionWord = "en büyüğü";
-      } else {
-        correctObj = fractions[0];
-        questionWord = "en küçüğü";
-      }
-
-      const optsList = fractions.map(x => x.s);
-      const correctStr = correctObj.s;
-      const displayOrder = shuffle([...optsList]);
-
       return {
         topic: this.topic,
-        text: `<span style='color:#fde047; font-size: 1.1em;'>${displayOrder.join(" , ")}</span><br>kesirlerinden <strong>${questionWord}</strong> hangisidir?`,
-        correct: correctStr,
-        wrongs: optsList.filter(x => x !== correctStr)
+        text: `Aşağıdakilerden hangisi <strong>${base}</strong> sayısının bir katıdır?`,
+        correct: String(correct),
+        wrongs: Array.from(wrongsSet).slice(0, 3).map(String)
+      };
+    }
+  },
+  // 3. Kalansız Bölünebilme (iki kural birden)
+  {
+    topic: "Kalansız Bölünebilme",
+    gen() {
+    const rules = [
+      { n: 2, text: "2'ye" },
+      { n: 3, text: "3'e" },
+      { n: 4, text: "4'e" },
+      { n: 5, text: "5'e" },
+      { n: 6, text: "6'ya" },
+      { n: 9, text: "9'a" },
+      { n: 10, text: "10'a" },
+      { n: 6, text: "hem 2'ye hem de 3'e", special: true }, // 2 ve 3'e bölünme = 6'ya bölünme
+      { n: 9, text: "hem 3'e hem de 9'a", special: true }   // 3 ve 9'a bölünme = 9'a bölünme
+    ];
+
+    // Rastgele bir kural seç
+    const selected = rules[Math.floor(Math.random() * rules.length)];
+    const target = selected.n;
+    
+    // Doğru cevabı oluştur (Hedef sayının 10 ile 50 katı arası bir sayı)
+    const multiplier = Math.floor(Math.random() * 40) + 10;
+    const correct = multiplier * target;
+
+    // Yanlış seçenekleri oluştur
+    let wrongs = new Set();
+    while (wrongs.size < 3) {
+      // Doğru cevabın yakınlarında rastgele sayılar üret
+      let offset = Math.floor(Math.random() * 20) - 10;
+      let cand = correct + (offset === 0 ? 1 : offset);
+      
+      if (cand > 0 && cand % target !== 0) {
+        // Özel kural kontrolleri (Örn: Hem 2 hem 3 diyorsa 6'ya bölünmemeli)
+        wrongs.add(cand);
+      }
+    }
+
+    return {
+      topic: this.topic,
+      text: `Aşağıdaki sayılardan hangisi <strong>${selected.text}</strong> kalansız bölünür?`,
+      correct: String(correct),
+      wrongs: Array.from(wrongs).map(String)
+    };
+   }
+  },
+  // 4. Asal Sayılar 
+  {
+    topic: "Asal Sayılar",
+    gen() {
+    // 1 ile 100 arasındaki asal sayılar listesi
+    const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97];
+    
+    // Rastgele bir doğru cevap (asal) seç
+    const correct = primes[Math.floor(Math.random() * primes.length)];
+    
+    // Yanlış seçenekleri (bileşik sayıları) üretmek için yardımcı fonksiyon
+    const getWrong = () => {
+      const w = Math.floor(Math.random() * 98) + 2; // 2-99 arası
+      if (primes.includes(w)) return getWrong(); // Eğer asalsa tekrar dene
+      return w;
+    };
+
+    // 3 tane benzersiz yanlış seçenek oluştur
+    const wrongs = new Set();
+    while (wrongs.size < 3) {
+      const w = getWrong();
+      if (w !== correct) wrongs.add(w);
+    }
+
+    return {
+      topic: this.topic,
+      text: `Aşağıdaki sayılardan hangisi bir <strong>asal sayıdır</strong>?`,
+      correct: correct.toString(),
+      wrongs: Array.from(wrongs).map(n => n.toString())
+    };
+   }
+  },
+  // 5. Ortak Kat (EKOK problem)
+  {
+    topic: "Ortak Kat",
+    gen() {
+    // Rastgele iki sayı seç (Örn: 3-12 arası)
+    const a = Math.floor(Math.random() * 10) + 3;
+    const b = Math.floor(Math.random() * 10) + 3;
+    
+    // EBOB ve EKOK hesaplama
+    const gcd = (x, y) => y === 0 ? x : gcd(y, x % y);
+    const lcm = (a * b) / gcd(a, b);
+    
+    // Doğru cevap en küçük ortak kat (veya katlarından biri)
+    const correct = lcm;
+    
+    // Çeldiriciler: Sayıların sadece birine bölünen veya hiç bölünmeyen sayılar
+    let wrongs = new Set();
+    
+    // Klasik hata: Sayıların toplamı veya aradaki farklar
+    wrongs.add(a + b);
+    
+    while (wrongs.size < 3) {
+      // Doğru cevabın yakınlarında, her iki sayıya birden bölünmeyen sayılar
+      let cand = correct + (Math.floor(Math.random() * 10) - 5);
+      if (cand > 0 && cand !== correct && (cand % a !== 0 || cand % b !== 0)) {
+        wrongs.add(cand);
+      }
+    }
+    
+    return {
+      topic: this.topic,
+      text: `Aşağıdakilerden hangisi <strong>${a}</strong> ve <strong>${b}</strong> sayılarının bir <strong>ortak katıdır</strong>?`,
+      correct: String(correct),
+      wrongs: Array.from(wrongs).map(String)
+    };
+   }
+  },
+  // 6. Ortak Bölen (EBOB problem)
+  {
+    topic: "Ortak Bölen",
+    gen() {
+    // Rastgele bir ortak bölen ve bu bölenin katlarını seçiyoruz
+    const common = Math.floor(Math.random() * 8) + 2; // 2-9 arası bir ortak bölen
+    const a = common * (Math.floor(Math.random() * 10) + 2);
+    const b = common * (Math.floor(Math.random() * 10) + 2);
+
+    // Doğru cevap: ortak çarpanlardan (common) biri
+    const correct = common;
+
+    // Çeldiriciler: Sayıların sadece birini bölen veya hiçbirini bölmeyen sayılar
+    let wrongs = new Set();
+    
+    // Klasik hata: Sayıların farkı veya toplamı (Eğer ortak bölen değilse)
+    const diff = Math.abs(a - b);
+    if (a % diff !== 0 || b % diff !== 0) wrongs.add(diff);
+
+    while (wrongs.size < 3) {
+      // Rastgele bir sayı üret ve ortak bölen olmadığını kontrol et
+      let cand = Math.floor(Math.random() * 20) + 2;
+      if (cand !== correct && (a % cand !== 0 || b % cand !== 0)) {
+        wrongs.add(cand);
+      }
+    }
+
+    return {
+      topic: this.topic,
+      text: `Aşağıdakilerden hangisi <strong>${a}</strong> ve <strong>${b}</strong> sayılarının bir <strong>ortak bölenidir</strong>?`,
+      correct: String(correct),
+      wrongs: Array.from(wrongs).slice(0, 3).map(String)
+    };
+   }
+  },
+ ],
+  // ─────────────────────────────────────────────────────────────────
+  // 2. Tema: İstatistiksel Araştırma Süreci
+  // ─────────────────────────────────────────────────────────────────
+ [
+  // 7. Araştırma Sorusu Oluşturma
+  {
+    topic: "Araştırma Sorusu Oluşturma",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Aşağıdakilerden hangisi bir <strong>araştırma sorusu</strong> özelliği taşır?",
+        correct: "Okulumuzdaki öğrencilerin en sevdiği meyveler nelerdir?",
+        wrongs: [
+          "Türkiye'nin en yüksek dağı hangisidir?",
+          "En küçük asal sayı kaçtır?",
+          "Okul müdürünün ayakkabı numarası kaçtır?"
+        ]
+      };
+    }
+  },
+  {
+    topic: "Araştırma Sorusu Oluşturma",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Bir araştırmacı, <strong>farklı iki veri grubunu</strong> karşılaştırmak istiyor. Hangisi buna uygun bir sorudur?",
+        correct: "A ve B köylerinde üretilen yıllık buğday miktarları arasındaki fark nedir?",
+        wrongs: [
+          "En sevdiğin renk hangisidir?",
+          "Bugün hava sıcaklığı kaç derecedir?",
+          "Bir haftada kaç gün vardır?"
+        ]
+      };
+    }
+  },
+  {
+    topic: "Araştırma Sorusu Oluşturma",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Aşağıdakilerden hangisi <strong>nicel (ölçülebilir)</strong> bir araştırma sorusudur?",
+        correct: "Sınıfımızdaki öğrencilerin boy uzunlukları hangi aralıktadır?",
+        wrongs: [
+          "Arkadaşlarınızın en sevdiği film türü nedir?",
+          "Öğrenciler tatilde hangi şehirlere gitmekten hoşlanır?",
+          "Yemekhanede en beğenilen yemek hangisidir?"
+        ]
+      };
+    }
+  },
+  {
+    topic: "Araştırma Sorusu Oluşturma",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Bir kırtasiyeci, hangi ürünlerden daha çok sipariş vereceğini belirlemek için kime <strong>araştırma sorusu</strong> sormalıdır?",
+        correct: "Çevredeki okullarda okuyan öğrencilere.",
+        wrongs: [
+          "Kendi ailesine.",
+          "Yoldan geçen rastgele şoförlere.",
+          "Televizyondaki haber sunucularına."
+        ]
+      };
+    }
+  },
+  {
+    topic: "Araştırma Sorusu Oluşturma",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Aşağıdaki sorulardan hangisi <strong>tek bir veri</strong> elde edilmesine neden olduğu için araştırma sorusu sayılmaz?",
+        correct: "Okul kütüphanesinde toplam kaç adet kitap vardır?",
+        wrongs: [
+          "Öğrencilerin günlük kitap okuma süreleri ne kadardır?",
+          "Öğretmenlerin en çok okuduğu yazar kimdir?",
+          "Velilerin kütüphaneden beklentileri nelerdir?"
+        ]
+      };
+    }
+  },
+  {
+    topic: "Araştırma Sorusu Oluşturma",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Hangi soru <strong>nitel (kalite/özellik belirten)</strong> veri toplamaya yöneliktir?",
+        correct: "6. sınıf öğrencilerinin en çok ilgi duyduğu müzik aleti hangisidir?",
+        wrongs: [
+          "Sınıfın matematik sınavı not ortalaması kaçtır?",
+          "Okul binasının yüksekliği kaç metredir?",
+          "Bir sınıfta ortalama kaç sıra bulunmaktadır?"
+        ]
+      };
+    }
+  },
+  {
+    topic: "Araştırma Sorusu Oluşturma",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Bir teknoloji mağazası yeni bir telefon getirecektir. Hangisi doğru bir <strong>araştırma sorusu</strong> olur?",
+        correct: "Müşteriler bir telefonda en çok hangi özelliğe (kamera, pil vb.) önem veriyor?",
+        wrongs: [
+          "Mağazanın önünden günde kaç araba geçiyor?",
+          "Mağaza sahibi hangi marka telefon kullanıyor?",
+          "Mağazadaki lambalar kaç watt enerji harcıyor?"
+        ]
+      };
+    }
+  },
+  {
+    topic: "Araştırma Sorusu Oluşturma",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "<strong>'Öğrencilerin hafta sonu yaptıkları aktiviteler'</strong> konulu bir araştırmada hangisi uygun bir veri toplama yöntemi olur?",
+        correct: "Öğrencilere anket uygulamak.",
+        wrongs: [
+          "Kütüphanedeki eski gazeteleri okumak.",
+          "Matematik defterindeki problemleri çözmek.",
+          "Hava durumu raporlarını incelemek."
+        ]
+      };
+    }
+  },
+  {
+    topic: "Araştırma Sorusu Oluşturma",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Aşağıdakilerden hangisi bir araştırma sorusu <strong>olamaz</strong>?",
+        correct: "Dünyanın uydusu hangisidir?",
+        wrongs: [
+          "Sınıfımızdaki öğrencilerin en sevdiği dersler nelerdir?",
+          "Apartman sakinlerinin geri dönüşüm konusundaki fikirleri nelerdir?",
+          "Hangi yaş grubundaki insanlar daha fazla spor yapıyor?"
+        ]
+      };
+    }
+  },
+  // 8. Araştırma Sorusu Ölçütleri
+  {
+    topic: "Araştırma Sorusu Ölçütleri",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Bir sorunun <strong>istatistiksel araştırma sorusu</strong> sayılabilmesi için temel şart nedir?",
+        correct: "Gruptan elde edilen verilerin kişiden kişiye farklılık göstermesi.",
+        wrongs: [
+          "Sorunun sadece rakamlarla cevaplanması.",
+          "Cevabın herkes tarafından aynı şekilde bilinmesi.",
+          "Sorunun sadece tek bir kişiye yöneltilmesi."
+        ]
+      };
+    }
+  },
+  {
+    topic: "Araştırma Sorusu Ölçütleri",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Aşağıdakilerden hangisi bir araştırma sorusu <strong>olamaz</strong>?",
+        correct: "Türkiye'nin en kalabalık şehri hangisidir?",
+        wrongs: [
+          "Okulumuzdaki öğretmenlerin hobileri nelerdir?",
+          "Sınıfımızdaki öğrencilerin günlük uyku süreleri ne kadardır?",
+          "Mahalle sakinlerinin en çok tercih ettiği ulaşım aracı nedir?"
+        ]
+      };
+    }
+  },
+  {
+    topic: "Araştırma Sorusu Ölçütleri",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Bir araştırma sorusu hazırlanırken aşağıdakilerden hangisine <strong>dikkat edilmelidir</strong>?",
+        correct: "Sorunun tarafsız ve yönlendirmesiz olmasına.",
+        wrongs: [
+          "Sorunun sadece tek bir cevabı olmasına.",
+          "Sorunun sadece okul müdürüne sorulmasına.",
+          "Sorunun cevabının gizli tutulmasına."
+        ]
+      };
+    }
+  },
+  {
+    topic: "Araştırma Sorusu Ölçütleri",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Aşağıdakilerden hangisi <strong>nitel (özellik belirten)</strong> veri toplayan bir araştırma sorusudur?",
+        correct: "Öğrencilerin en sevdiği müzik türleri nelerdir?",
+        wrongs: [
+          "Öğrencilerin boyları kaç santimetredir?",
+          "Bir sınıftaki ortalama öğrenci sayısı kaçtır?",
+          "Sınıf mevcudu kaçtır?"
+        ]
+      };
+    }
+  },
+  {
+    topic: "Araştırma Sorusu Ölçütleri",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Bir belediye başkanı parklara yapılacak oyuncaklar için çocuklara soru soruyor. Buradaki <strong>veri grubu</strong> hangisidir?",
+        correct: "İlçede yaşayan çocuklar",
+        wrongs: [
+          "Belediye çalışanları",
+          "Oyuncak üreticileri",
+          "Okul müdürleri"
+        ]
+      };
+    }
+  },
+  {
+    topic: "Araştırma Sorusu Ölçütleri",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Aşağıdakilerden hangisi <strong>nicel (sayısal)</strong> veri toplayan bir araştırma sorusudur?",
+        correct: "6. sınıf öğrencilerinin günde kaç sayfa kitap okuduğu.",
+        wrongs: [
+          "Öğrencilerin en sevdiği renkler.",
+          "Öğrencilerin tatilde gitmek istediği yerler.",
+          "Öğrencilerin en sevdiği dondurma aromaları."
+        ]
+      };
+    }
+  },
+  {
+    topic: "Araştırma Sorusu Ölçütleri",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Aşağıdaki sorulardan hangisi <strong>belirli bir gruba</strong> yönelik değildir?",
+        correct: "En büyük il hangisidir?",
+        wrongs: [
+          "Sınıfımızdaki öğrencilerin beslenme alışkanlıkları nelerdir?",
+          "Apartman sakinlerinin çevre kirliliği hakkındaki görüşleri nelerdir?",
+          "Doktorların en çok karşılaştığı hastalıklar nelerdir?"
+        ]
+      };
+    }
+  },
+  // 9. Araştırma Planlama
+  {
+    topic: "Araştırma Planlama",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Veri toplama sürecine başlamadan önce yapılması gereken <strong>ilk adım</strong> hangisidir?",
+        correct: "Amaca uygun bir araştırma sorusu belirlemek.",
+        wrongs: [
+          "Verileri tabloya yerleştirmek.",
+          "Sütun grafiği çizmek.",
+          "Sonuçları rapor haline getirmek."
+        ]
+      };
+    }
+  },
+  {
+    topic: "Araştırma Planlama",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Bir ortaokuldaki kantin fiyatları hakkında araştırma yapmak isteyen biri için en <strong>uygun örneklem</strong> hangisidir?",
+        correct: "O okulda eğitim gören öğrenciler.",
+        wrongs: [
+          "Başka bir okuldaki öğretmenler.",
+          "Okulun çevresindeki esnaflar.",
+          "Okul binasını inşa eden işçiler."
+        ]
+      };
+    }
+  },
+  {
+    topic: "Araştırma Planlama",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Hangi veri toplama yöntemi, insanların bir konu hakkındaki <strong>görüşlerini yazılı olarak</strong> almak için daha pratiktir?",
+        correct: "Anket",
+        wrongs: [
+          "Gözlem",
+          "Deney",
+          "Kütüphane taraması"
+        ]
+      };
+    }
+  },
+  {
+    topic: "Araştırma Planlama",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Aşağıdakilerden hangisi araştırmanın <strong>güvenirliğini</strong> olumsuz etkiler?",
+        correct: "Grubun sadece araştırmacıyı destekleyen kişilerden seçilmesi.",
+        wrongs: [
+          "Soruların açık ve net olması.",
+          "Veri grubunun geniş tutulması.",
+          "Cevapların tarafsızca kaydedilmesi."
+        ]
+      };
+    }
+  },
+  {
+    topic: "Araştırma Planlama",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Toplanan verilerin daha kolay okunması ve karşılaştırılması için sayıların satır ve sütunlarla gösterildiği yapıya ne denir?",
+        correct: "Sıklık Tablosu",
+        wrongs: [
+          "Araştırma sorusu",
+          "Örneklem grubu",
+          "Hipotez"
+        ]
+      };
+    }
+  },
+  {
+    topic: "Araştırma Planlama",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "İnsanlarla <strong>yüz yüze konuşarak</strong> derinlemesine bilgi toplama yöntemine ne ad verilir?",
+        correct: "Mülakat (Görüşme)",
+        wrongs: [
+          "Anket",
+          "Test",
+          "Gözlem"
+        ]
+      };
+    }
+  },
+  {
+    topic: "Araştırma Planlama",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Araştırma sürecinde <strong>'verilerin düzenlenmesi'</strong> aşamasında aşağıdakilerden hangisi yapılır?",
+        correct: "Toplanan ham verilerin tablo veya grafiklere dönüştürülmesi.",
+        wrongs: [
+          "Araştırma konusunun seçilmesi.",
+          "Hedef kitleye soruların sorulması.",
+          "Anket kağıtlarının basılması."
+        ]
+      };
+    }
+  },
+  // 10. Anket Sorusu Hazırlama
+  {
+    topic: "Anket Sorusu Hazırlama",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Bir anket sorusunun en önemli özelliği aşağıdakilerden hangisi olmalıdır?",
+        correct: "Herkes tarafından aynı şekilde anlaşılması ve net olması.",
+        wrongs: [
+          "Cevabı veren kişinin duygularını etkilemesi.",
+          "Sorunun çok uzun ve karmaşık olması.",
+          "Sorunun sadece araştırmacının istediği cevaba yönlendirmesi."
+        ]
+      };
+    }
+  },
+  {
+    topic: "Anket Sorusu Hazırlama",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "<strong>'Sizce de trafik kurallarına uymayanlar cezalandırılmalı mıdır?'</strong> sorusu neden iyi bir anket sorusu değildir?",
+        correct: "Sorunun içinde 'Sizce de' ifadesi olduğu için yönlendiricidir.",
+        wrongs: [
+          "Soru çok kısa olduğu için.",
+          "İnsanların fikirlerini sorduğu için.",
+          "Konu çok önemsiz olduğu için."
+        ]
+      };
+    }
+  },
+  {
+    topic: "Anket Sorusu Hazırlama",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Bir ankette verilen seçeneklerin (şıklardan) özelliği nasıl olmalıdır?",
+        correct: "Seçenekler birbirini kapsamamalı ve tüm olasılıkları içermelidir.",
+        wrongs: [
+          "Seçenekler birbirine çok yakın sayılardan oluşmalıdır.",
+          "Sadece iki seçenek olmalıdır (Evet-Hayır).",
+          "Seçenekler alfabetik sıraya göre dizilmelidir."
+        ]
+      };
+    }
+  },
+  {
+    topic: "Anket Sorusu Hazırlama",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Aşağıdaki sorulardan hangisi bir ankette <strong>kişisel fikre müdahale etmeden</strong> bilgi toplar?",
+        correct: "En sık kullandığınız sosyal medya platformu hangisidir?",
+        wrongs: [
+          "Sağlıksız olduğu bilinen gazlı içecekleri neden hala içiyorsunuz?",
+          "Çok faydalı olan sütü her gün içiyor musunuz?",
+          "Eski moda olan okul formasının eski moda olduğunu düşünüyor musunuz?"
+        ]
+      };
+    }
+  },
+  {
+    topic: "Anket Sorusu Hazırlama",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Anket hazırlarken <strong>'Diğer'</strong> seçeneğinin eklenmesinin temel amacı nedir?",
+        correct: "Verilen şıklar dışında kalabilecek farklı cevaplara imkan tanımak.",
+        wrongs: [
+          "Anketi daha uzun göstermek.",
+          "Soruyu hazırlayanın yorulmasını engellemek.",
+          "İnsanların kafasını karıştırmak."
+        ]
+      };
+    }
+  },
+  {
+    topic: "Anket Sorusu Hazırlama",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Bir sınıftaki öğrencilerin temizlik alışkanlıklarını ölçmek için hangi soru en <strong>tarafsızdır</strong>?",
+        correct: "Ellerinizi günde ortalama kaç kez yıkarsınız?",
+        wrongs: [
+          "Mikroplardan korunmak için ellerinizi yıkıyor musunuz?",
+          "Pis kalmamak için günde kaç kez el yıkarsınız?",
+          "Sizce de herkes ellerini yıkamalı mıdır?"
+        ]
+      };
+    }
+  },
+  {
+    topic: "Anket Sorusu Hazırlama",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Aşağıdaki ifadelerden hangisi <strong>yönlendirme içeren</strong> (taraflı) bir sorudur?",
+        correct: "Kaliteli eğitimiyle bilinen okulumuzdan memnun musunuz?",
+        wrongs: [
+          "Günde kaç saat ders çalışıyorsunuz?",
+          "En sevdiğiniz meyve hangisidir?",
+          "Okula hangi ulaşım aracı ile geliyorsunuz?"
+        ]
+      };
+    }
+  },
+  {
+    topic: "Anket Sorusu Hazırlama",
+    gen() {
+      return {
+        topic: this.topic,
+        text: "Anket sorularının sonunda yer alan <strong>'Teşekkür ederim'</strong> notu hangi aşamanın parçasıdır?",
+        correct: "Anketin nezaket ve bitiş aşaması.",
+        wrongs: [
+          "Veri toplama aşaması.",
+          "Örneklem belirleme aşaması.",
+          "Soruları hazırlama aşaması."
+        ]
+      };
+    }
+  },
+ ], 
+  // ─────────────────────────────────────────────────────────────────
+  // 3. Tema: Sayılar ve Nicelikler (2)
+  // ─────────────────────────────────────────────────────────────────
+ [
+  // 12. Ondalık Basamak Değeri
+  {
+    topic: "Ondalık Basamak Değeri",
+    gen() {
+      const num = parseFloat((Math.random() * 80 + 10).toFixed(3));
+      const str = num.toString();
+      const parts = str.split('.');
+      const intPart = parts[0];
+      const decPart = parts[1] || "000";
+      
+      const ask = rnd(0, 2); // 0: birler, 1: onda birler, 2: yüzde birler
+      let correct, place;
+      if (ask === 0) {
+        correct = intPart[intPart.length - 1];
+        place = "birler";
+      } else if (ask === 1) {
+        correct = decPart[0];
+        place = "onda birler";
+      } else {
+        correct = decPart[1] || "0";
+        place = "yüzde birler";
+      }
+      
+      // Çeldiriciler: Aynı sayının içindeki diğer basamakların rakamları!
+      let wrongs = new Set();
+      wrongs.add(intPart[0]); 
+      wrongs.add(decPart[0]);
+      wrongs.add(decPart[1] || "0");
+      wrongs.add(decPart[2] || "0");
+      wrongs.delete(correct);
+      
+      while (wrongs.size < 3) wrongs.add(String(rnd(0, 9)));
+      
+      return {
+        topic: this.topic,
+        text: `<strong>${num}</strong> ondalık gösteriminde <strong>${place}</strong> basamağındaki rakam kaçtır?`,
+        correct: String(correct),
+        wrongs: Array.from(wrongs).slice(0, 3).map(String)
+      };
+    }
+  },
+  // 13. Ondalık Yuvarlama
+  {
+    topic: "Ondalık Yuvarlama",
+    gen() {
+      const num = parseFloat((Math.random() * 10 + 1).toFixed(3));
+      const place = rnd(0, 1); // 0: onda bir, 1: yüzde bir
+      let correct;
+      if (place === 0) correct = Math.round(num * 10) / 10;
+      else correct = Math.round(num * 100) / 100;
+      
+      // Çeldiriciler: Yanlış yöne yuvarlama veya yanlış basamağa yuvarlama
+      let wrongs = [];
+      if (place === 0) {
+        wrongs.push((correct - 0.1).toFixed(1));
+        wrongs.push((correct + 0.1).toFixed(1));
+        wrongs.push(Math.round(num).toString()); // Tam sayıya yuvarlama tuzağı
+      } else {
+        wrongs.push((correct - 0.01).toFixed(2));
+        wrongs.push((correct + 0.01).toFixed(2));
+        wrongs.push((Math.round(num * 10) / 10).toFixed(1)); // Onda birliğe yuvarlama tuzağı
+      }
+      
+      return {
+        topic: this.topic,
+        text: `<strong>${num}</strong> sayısını <strong>${place === 0 ? "onda birler" : "yüzde birler"}</strong> basamağına yuvarladığımızda hangisi elde edilir?`,
+        correct: correct.toString(),
+        wrongs: [...new Set(wrongs)].filter(w => w !== correct.toString()).slice(0, 3)
+      };
+    }
+  },
+  // 14. Kesir ile Bölme İlişkisi
+  {
+    topic: "Kesir - Bölme İlişkisi",
+    gen() {
+    // Payı rastgele seçiyoruz (Payda 5 olacağı için ondalık kısım .2, .4, .6, .8 veya .0 olacak)
+    const a = rnd(1, 24); 
+    const b = 5;
+    
+    // Doğru cevap: a/5 işleminin ondalık sonucu
+    // Örn: 7 / 5 = 1.4
+    const correctValue = (a / b).toFixed(1);
+    
+    // Çeldiriciler: Pay ve paydayı ters bölme, işlem hatası veya virgül kaydırma tuzağı
+    let wrongs = new Set();
+    wrongs.add((b / a).toFixed(2)); // Ters bölme (5 / a)
+    wrongs.add((a / b + 0.1).toFixed(1)); // Küçük işlem hatası
+    wrongs.add((a / b - 0.2).toFixed(1)); // Küçük işlem hatası
+    
+    // Eğer yanlış şıklar kazara doğruyla aynı çıkarsa sayıları temizle/doldur
+    while (wrongs.size < 3) {
+      let cand = (rnd(1, 50) / 10).toFixed(1);
+      if (cand !== correctValue) wrongs.add(cand);
+    }
+
+    return {
+      topic: this.topic,
+      text: `<strong>${a} / ${b}</strong> işleminin <strong>ondalık gösterim</strong> olarak ifade edilmiş hali aşağıdakilerden hangisidir?`,
+      correct: correctValue.replace('.', ','), // Türkiye formatı için virgül kullanımı
+      wrongs: Array.from(wrongs).slice(0, 3).map(w => w.replace('.', ','))
+    };
+   }
+  },
+  // 15. Uzunluk Ölçme Birimleri
+  {
+    topic: "Uzunluk Ölçme",
+    gen() {
+    const units = [
+      { name: "km", val: 1000000 },
+      { name: "hm", val: 100000 },
+      { name: "dam", val: 10000 },
+      { name: "m", val: 1000 },
+      { name: "dm", val: 100 },
+      { name: "cm", val: 10 },
+      { name: "mm", val: 1 }
+    ];
+
+    // Rastgele iki farklı birim seç
+    const fromIdx = Math.floor(Math.random() * units.length);
+    let toIdx;
+    do {
+      toIdx = Math.floor(Math.random() * units.length);
+    } while (fromIdx === toIdx);
+
+    const fromUnit = units[fromIdx];
+    const toUnit = units[toIdx];
+
+    // Başlangıç değerini belirle (Çok büyük veya çok küçük sayılardan kaçınmak için)
+    const baseValue = Math.floor(Math.random() * 20) + 1; 
+    
+    // Dönüşüm hesabı: (Değer * KaynakBirimDeğeri) / HedefBirimDeğeri
+    const correctValue = (baseValue * fromUnit.val) / toUnit.val;
+
+    // Çeldiriciler: Genellikle 10'un kuvvetleri kadar hata (sıfır eksik/fazla)
+    let wrongs = new Set();
+    const factors = [0.1, 10, 100, 0.01];
+    
+    factors.forEach(f => {
+      let w = correctValue * f;
+      if (w !== correctValue && w > 0) {
+        // Çok uzun ondalık sayıları engellemek için kontrol
+        wrongs.add(w < 1 ? w.toFixed(3) : w.toString());
+      }
+    });
+
+    // Eğer yeterli yanlış yoksa rastgele ekle
+    while (wrongs.size < 3) {
+      wrongs.add((correctValue + Math.random() * 10).toFixed(1));
+    }
+
+    // Türkiye formatı için nokta/virgül düzenlemesi
+    const formatNum = (num) => num.toString().replace('.', ',');
+
+    return {
+      topic: this.topic,
+      text: `<strong>${formatNum(baseValue)} ${fromUnit.name}</strong> uzunluğu kaç <strong>${toUnit.name}</strong> eder?`,
+      correct: formatNum(correctValue),
+      wrongs: Array.from(wrongs).slice(0, 3).map(formatNum)
+    };
+   }
+  },
+  // 16. Gerçek Yaşam Problemleri (uzunluk, çevre)
+  {
+    topic: "Kesir Problemleri",
+    gen() {
+    const types = ["toplama", "çıkarma", "çarpma", "bölme"];
+    const type = types[Math.floor(Math.random() * types.length)];
+
+    // Rastgele pay ve paydalar (1-10 arası basit sayılar)
+    let n1 = rnd(1, 8), d1 = rnd(2, 6);
+    let n2 = rnd(1, 5), d2 = rnd(2, 6);
+
+    const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+    const simplify = (n, d) => {
+      const common = gcd(n, d);
+      return [n / common, d / common];
+    };
+
+    let resN, resD, symbol;
+
+    if (type === "toplama") {
+      symbol = "+";
+      resN = n1 * d2 + n2 * d1;
+      resD = d1 * d2;
+    } else if (type === "çıkarma") {
+      symbol = "-";
+      // Sonucun negatif çıkmaması için kontrol
+      if (n1 / d1 < n2 / d2) [n1, n2, d1, d2] = [n2, n1, d2, d1];
+      resN = n1 * d2 - n2 * d1;
+      resD = d1 * d2;
+    } else if (type === "çarpma") {
+      symbol = "×";
+      resN = n1 * n2;
+      resD = d1 * d2;
+    } else { // bölme
+      symbol = "÷";
+      resN = n1 * d2;
+      resD = d1 * n2;
+    }
+
+    const [finalN, finalD] = simplify(resN, resD);
+    const correct = `${finalN}/${finalD}`;
+
+    // Çeldiriciler: Payları/paydaları direkt toplama hatası veya ters işlem
+    let wrongs = new Set();
+    wrongs.add(`${resN + 1}/${resD}`);
+    wrongs.add(`${resD}/${resN}`); // Ters çevirme hatası
+    wrongs.add(`${n1 + n2}/${d1 + d2}`); // Klasik pay-payda toplama hatası
+
+    while (wrongs.size < 3) {
+      let wN = rnd(1, 20), wD = rnd(2, 20);
+      if (`${wN}/${wD}` !== correct) wrongs.add(`${wN}/${wD}`);
+    }
+
+    return {
+      topic: this.topic,
+      text: `Aşağıdaki işlemin sonucu hangisidir?<br><br>
+<div style="display: inline-flex; align-items: center; font-weight: bold; font-size: 18px; gap: 8px;">
+  <div style="text-align: center;">
+    <div style="border-bottom: 2px solid white; padding: 0 4px;">${n1}</div>
+    <div style="padding: 0 4px;">${d1}</div>
+  </div>
+  <div>${symbol}</div>
+  <div style="text-align: center;">
+    <div style="border-bottom: 2px solid white; padding: 0 4px;">${n2}</div>
+    <div style="padding: 0 4px;">${d2}</div>
+  </div>
+</div><br>`,
+      correct: correct,
+      wrongs: Array.from(wrongs).slice(0, 3)
+    };
+   }
+  },
+ ],
+  // ─────────────────────────────────────────────────────────────────
+  // 4. Tema: Veriden Olasılığa
+  // ─────────────────────────────────────────────────────────────────
+ [
+  // 17. Olasılık Tahmini
+  {
+    topic: "Olasılık Tahmini",
+    gen() {
+    const types = ["teorik_zar", "teorik_para", "teorik_top", "deneysel_basket", "deneysel_zar"];
+    const type = types[Math.floor(Math.random() * types.length)];
+
+    const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+    const simplify = (n, d) => {
+      const common = gcd(n, d);
+      return `${n / common}/${d / common}`;
+    };
+
+    if (type === "teorik_zar") {
+      const target = rnd(1, 6);
+      return {
+        topic: this.topic,
+        text: `Hilesiz bir zar havaya atıldığında üst yüze <strong>${target}</strong> gelme olasılığı kaçtır?`,
+        correct: "1/6",
+        wrongs: ["1/2", `${target}/6`, "5/6"]
+      };
+    } 
+    
+    else if (type === "teorik_para") {
+      const sides = ["Yazı", "Tura"];
+      const side = sides[Math.floor(Math.random() * 2)];
+      return {
+        topic: this.topic,
+        text: `Madeni bir para havaya atıldığında üst yüze <strong>${side}</strong> gelme olasılığı kaçtır?`,
+        correct: "1/2",
+        wrongs: ["1/4", "1/1", "0"]
+      };
+    } 
+    
+    else if (type === "teorik_top") {
+      const red = rnd(2, 6);
+      const blue = rnd(2, 6);
+      const total = red + blue;
+      return {
+        topic: this.topic,
+        text: `Bir torbada ${red} kırmızı ve ${blue} mavi top vardır. Torbadan rastgele çekilen bir topun <strong>kırmızı</strong> olma olasılığı kaçtır?`,
+        correct: simplify(red, total),
+        wrongs: [simplify(blue, total), `${red}/${blue}`, `1/${total}`]
+      };
+    } 
+    
+    else if (type === "deneysel_basket") {
+      // Daha kolay anlaşılması için toplam atış sayıları küçültüldü (10 veya 20)
+      const totalShots = [10, 20][rnd(0, 1)];
+      
+      // Her zaman tam sayı ve basit kesirler (1/2, 1/4, 1/5, 2/5 vb.) çıkaracak isabet sayıları
+      let madeShots;
+      if (totalShots === 10) {
+        madeShots = [2, 4, 5, 8][rnd(0, 3)]; // 2/10, 4/10, 5/10, 8/10
+      } else {
+        madeShots = [4, 5, 10, 15][rnd(0, 3)]; // 4/20, 5/20, 10/20, 15/20
+      }
+
+      return {
+        topic: "Deneysel Olasılık",
+        text: `Bir basketbolcu yaptığı <strong>${totalShots}</strong> atıştan <strong>${madeShots}</strong> tanesini baskete çevirmiştir. Bu sporcunun bir sonraki atışını basket atma olasılığının <strong>deneysel değeri</strong> kaçtır?`,
+        correct: simplify(madeShots, totalShots),
+        // Doğru cevabın yanlışlar arasına düşmemesi için basit bir filtreleme
+        wrongs: [simplify(totalShots - madeShots, totalShots), "1/2", "1/4", "1/5"]
+                .filter(ans => ans !== simplify(madeShots, totalShots))
+                .slice(0, 3)
+      };
+    } 
+    
+    else { // deneysel_zar
+      // 60 yerine 10 veya 20 atış gibi daha küçük sayılar
+      const totalThrows = [10, 20][rnd(0, 1)];
+      
+      let occurrences;
+      if (totalThrows === 10) {
+        occurrences = [2, 3, 4, 5][rnd(0, 3)];
+      } else {
+        occurrences = [2, 4, 5, 10][rnd(0, 3)];
+      }
+      
+      const targetNum = rnd(1, 6);
+
+      return {
+        topic: "Deneysel Olasılık",
+        text: `Bir zar ${totalThrows} kez atılıyor ve ${occurrences} kez <strong>'${targetNum}'</strong> geliyor. Bu deneye göre zarın tekrar atıldığında '${targetNum}' gelme olasılığı kaçtır?`,
+        correct: simplify(occurrences, totalThrows),
+        wrongs: ["1/6", simplify(totalThrows - occurrences, totalThrows), "1/2", "1/3"]
+                .filter(ans => ans !== simplify(occurrences, totalThrows))
+                .slice(0, 3)
+      };
+    }
+   }
+  },
+ ],
+  // ─────────────────────────────────────────────────────────────────
+  // 5. Tema: Geometrik Şekiller
+  // ─────────────────────────────────────────────────────────────────
+ [
+  // 18. İki Paralel ve Bir Kesen (İç Ters Açı)
+  {
+    topic: "Paralel Doğru ve Kesen",
+    gen() {
+    const types = ["iç ters", "dış ters", "yöndeş", "ters"];
+    const type = types[Math.floor(Math.random() * types.length)];
+
+    // Rastgele bir başlangıç açısı seç (40-140 arası, 5'in katı)
+    const angleA = Math.floor(Math.random() * 21) * 5 + 40;
+    
+    // Bu kuralların tamamında açılar birbirine EŞİTTİR.
+    const correct = angleA; 
+
+    // Çeldiriciler: Bütünler açı tuzağı (180-x), tümler açı tuzağı (90-x) ve rastgele kaydırma
+    let wrongs = new Set();
+    wrongs.add(180 - angleA); // En güçlü çeldirici: Bütünler açı
+    wrongs.add(90 - (angleA % 90)); // Tümler açı mantığı
+    
+    while (wrongs.size < 3) {
+      let cand = angleA + (Math.random() > 0.5 ? 10 : -10);
+      if (cand > 0 && cand !== correct) wrongs.add(cand);
+    }
+
+    let questionText = "";
+    switch (type) {
+      case "iç ters":
+        questionText = `Paralel iki doğruyu bir kesen kestiğinde oluşan <strong>iç ters açılardan</strong> birinin ölçüsü ${angleA}° ise, diğer iç ters açının ölçüsü kaç derecedir?`;
+        break;
+      case "dış ters":
+        questionText = `Paralel iki doğruyu bir kesen kestiğinde oluşan <strong>dış ters açılardan</strong> birinin ölçüsü ${angleA}° ise, diğer dış ters açının ölçüsü kaç derecedir?`;
+        break;
+      case "yöndeş":
+        questionText = `Paralel iki doğrunun bir kesenle yaptığı açılarda, aynı yöne bakan <strong>yöndeş açılardan</strong> birinin ölçüsü ${angleA}° ise, bu açının yöndeşi olan açının ölçüsü kaç derecedir?`;
+        break;
+      case "ters":
+        questionText = `İki doğrunun kesişmesiyle oluşan <strong>ters açılardan</strong> birinin ölçüsü ${angleA}° ise, bu açının tam karşısında bulunan ters açının ölçüsü kaç derecedir?`;
+        break;
+    }
+
+    return {
+      topic: this.topic,
+      text: questionText,
+      correct: String(correct),
+      wrongs: Array.from(wrongs).slice(0, 3).map(String)
+    };
+   }
+  },
+  // 20. Üçgenin Açıları
+  {
+    topic: "Üçgenin Açıları",
+    gen() {
+    // Rastgele iki iç açı seçiyoruz (Toplamları 180'den küçük olmalı)
+    let a = Math.floor(Math.random() * 80) + 30; // 30-110 arası
+    let b = Math.floor(Math.random() * 60) + 20; // 20-80 arası
+    
+    // Üçüncü iç açıyı hesapla
+    const c = 180 - (a + b);
+    
+    // Soru tipi seçimi: 0 -> Üçüncü iç açı, 1 -> Dış açı
+    const type = Math.floor(Math.random() * 2);
+    
+    let correct, questionText, wrongs = new Set();
+
+    if (type === 0) {
+      // Üçüncü iç açıyı sor
+      correct = c;
+      questionText = `Bir üçgenin iki iç açısının ölçüleri <strong>${a}°</strong> ve <strong>${b}°</strong> olduğuna göre, bu üçgenin <strong>üçüncü iç açısı</strong> kaç derecedir?`;
+      
+      // Çeldiriciler
+      wrongs.add(a + b); // İki açının toplamı tuzağı
+      wrongs.add(180 - a); // Sadece birini çıkarma hatası
+      wrongs.add(c + 10);
+    } else {
+      // Dış açıyı sor (a ve b'nin dış açısı c'nin yanındaki açıdır yani a+b)
+      correct = a + b;
+      questionText = `Bir üçgenin iki iç açısının ölçüleri <strong>${a}°</strong> ve <strong>${b}°</strong>'dir. Bu iki açının bulunduğu köşelerden farklı olan üçüncü köşedeki <strong>dış açı</strong> kaç derecedir?`;
+      
+      // Çeldiriciler
+      wrongs.add(c); // İç açıyı işaretleme tuzağı
+      wrongs.add(180 - (a + b)); // Tekrar 180'den çıkarma hatası
+      wrongs.add(Math.abs(a - b)); // Çıkarma hatası
+    }
+
+    // Set kontrolü ile hatalı şıkları temizle ve doldur
+    while (wrongs.size < 3) {
+      let cand = correct + (Math.floor(Math.random() * 20) - 10);
+      if (cand > 0 && cand !== correct) wrongs.add(cand);
+    }
+
+    return {
+      topic: this.topic,
+      text: questionText,
+      correct: String(correct),
+      wrongs: Array.from(wrongs).slice(0, 3).map(String)
+    };
+   }
+  },
+  // 21. Dörtgenlerin Özellikleri
+  {
+    topic: "Dörtgen Özellikleri",
+    gen() {
+    const quadTypes = ["kare", "dikdörtgen", "paralelkenar", "eşkenar dörtgen", "yamuk"];
+    const quad = quadTypes[Math.floor(Math.random() * quadTypes.length)];
+    const isAngleQuestion = Math.random() > 0.5; // %50 bilgi sorusu, %50 açı sorusu
+
+    let questionText, correct, wrongs = new Set();
+
+    if (isAngleQuestion) {
+      // --- AÇI HESAPLAMA SORULARI ---
+      const angle = rnd(50, 130, 5);
+      
+      if (quad === "paralelkenar" || quad === "eşkenar dörtgen") {
+        const type = Math.floor(Math.random() * 2); // 0: ardışık (bütünler), 1: karşılıklı (eşit)
+        if (type === 0) {
+          questionText = `Bir <strong>${quad}de</strong> ardışık iki açıdan birinin ölçüsü ${angle}° ise, diğer açının ölçüsü kaç derecedir?`;
+          correct = 180 - angle;
+          wrongs.add(angle);
+          wrongs.add(90);
+        } else {
+          questionText = `Bir <strong>${quad}de</strong> karşılıklı açılardan birinin ölçüsü ${angle}° ise, diğer açının ölçüsü kaç derecedir?`;
+          correct = angle;
+          wrongs.add(180 - angle);
+          wrongs.add(360 - angle);
+        }
+      } else if (quad === "yamuk") {
+        questionText = `Bir <strong>yamukta</strong> aynı yan kenara ait alt ve üst açılardan birinin ölçüsü ${angle}° ise, diğer açının ölçüsü kaç derecedir?`;
+        correct = 180 - angle;
+        wrongs.add(angle);
+        wrongs.add(360 - angle);
+      } else { // Kare veya Dikdörtgen
+        questionText = `Bir <strong>${quad}nin</strong> tüm iç açılarının toplamı kaç derecedir?`;
+        correct = 360;
+        wrongs.add(180);
+        wrongs.add(90);
+      }
+    } else {
+      // --- GENEL BİLGİ SORULARI ---
+      if (quad === "kare") {
+        questionText = "Aşağıdakilerden hangisi <strong>karenin</strong> bir özelliği değildir?";
+        correct = "Köşegenleri birbirini dik kesmez.";
+        wrongs.add("Tüm kenar uzunlukları eşittir.");
+        wrongs.add("İç açılarının her biri 90 derecedir.");
+        wrongs.add("Köşegen uzunlukları birbirine eşittir.");
+      } else if (quad === "eşkenar dörtgen") {
+        questionText = "<strong>Eşkenar dörtgen</strong> ile ilgili hangisi her zaman doğrudur?";
+        correct = "Köşegenleri birbirini dik keser.";
+        wrongs.add("Köşegen uzunlukları birbirine eşittir.");
+        wrongs.add("Tüm iç açıları 90 derecedir.");
+        wrongs.add("Sadece iki kenarı paraleldir.");
+      } else if (quad === "dikdörtgen") {
+        questionText = "<strong>Dikdörtgen</strong> için aşağıdakilerden hangisi yanlıştır?";
+        correct = "Köşegenleri her zaman birbirini dik keser.";
+        wrongs.add("Karşılıklı kenar uzunlukları eşittir.");
+        wrongs.add("Köşegen uzunlukları birbirine eşittir.");
+        wrongs.add("İç açılarının toplamı 360 derecedir.");
+      } else if (quad === "paralelkenar") {
+        questionText = "<strong>Paralelkenarda</strong> ardışık iki açının toplamı kaç derecedir?";
+        correct = "180";
+        wrongs.add("90");
+        wrongs.add("360");
+        wrongs.add("270");
+      } else { // Yamuk
+        questionText = "<strong>Yamuk</strong> dörtgenini diğerlerinden ayıran en temel özellik nedir?";
+        correct = "Sadece iki kenarının (alt ve üst taban) birbirine paralel olması.";
+        wrongs.add("Tüm kenarlarının birbirine paralel olması.");
+        wrongs.add("Köşegenlerinin dik kesişmesi.");
+        wrongs.add("Karşılıklı açılarının eşit olması.");
+      }
+    }
+
+    // Set'ten diziye çevir ve eksik şık varsa tamamla
+    while (wrongs.size < 3) {
+      let cand = Math.floor(Math.random() * 360);
+      if (cand !== correct) wrongs.add(String(cand));
+    }
+
+    return {
+      topic: this.topic,
+      text: questionText,
+      correct: String(correct),
+      wrongs: Array.from(wrongs).slice(0, 3).map(String)
+    };
+   }
+  },
+ ],
+  // ─────────────────────────────────────────────────────────────────
+  // 6. Tema: İşlemlerle Cebirsel Düşünme ve Değişimler
+  // ─────────────────────────────────────────────────────────────────
+ [
+  // 23. Bilinmeyen Nicelikler
+  {
+    topic: "Bilinmeyen Nicelikler",
+    gen() {
+    const types = ["x_denklem_zor", "sozel_ifade_kompleks"];
+    const type = types[Math.floor(Math.random() * types.length)];
+
+    if (type === "x_denklem_zor") {
+      // Denklem: ax - b = c veya ax + b = c (x'in tam sayı çıkması garanti)
+      const a = rnd(3, 8);
+      const xTarget = rnd(4, 15);
+      const isMinus = Math.random() > 0.5;
+      const b = rnd(1, 20);
+      
+      const c = isMinus ? (a * xTarget) - b : (a * xTarget) + b;
+      const operationSign = isMinus ? "-" : "+";
+
+      let wrongs = new Set();
+      // Yaygın hatalar: Karşıya atarken işaret değiştirmeme, bölme yerine çarpma yapma
+      wrongs.add(Math.abs(Math.floor((c + (isMinus ? -b : b)) / a))); 
+      wrongs.add(xTarget + rnd(1, 5));
+      wrongs.add(Math.floor(c / a));
+
+      return {
+        topic: "Bilinmeyen Nicelikler (x)",
+        text: `<strong>${a}x ${operationSign} ${b} = ${c}</strong> denkleminde <strong>x</strong> değerini sağlayan sayı kaçtır?`,
+        correct: String(xTarget),
+        wrongs: Array.from(wrongs).slice(0, 3).map(String)
+      };
+    } else {
+      // Kompleks sözel ifadeler (İşlem önceliği ve parantez kullanımı)
+      const n = rnd(2, 9);
+      const m = rnd(2, 9);
+      const scenarios = [
+        {
+          sozel: `Bir sayının ${n} katının ${m} eksiği`,
+          dogru: `${n}x - ${m}`,
+          yanlislar: [`${n}(x - ${m})`, `x/${n} - ${m}`, `${n}x + ${m}`]
+        },
+        {
+          sozel: `Bir sayının ${m} fazlasının ${n} katı`,
+          dogru: `${n}(x + ${m})`,
+          yanlislar: [`${n}x + ${m}`, `x + ${n*m}`, `${n}x - ${m}`]
+        },
+        {
+          sozel: `Bir sayının ${n} eksiğinin yarısı`,
+          dogru: `(x - ${n}) / 2`,
+          yanlislar: [`x - ${n}/2`, `2x - ${n}`, `(x + ${n}) / 2`]
+        },
+        {
+          sozel: `Bir sayının ${n} katının ${m} fazlasının yarısı`,
+          dogru: `(${n}x + ${m}) / 2`,
+          yanlislar: [`${n}x + ${m}/2`, `${n}(x + ${m}) / 2`, `2x + ${n} + ${m}`]
+        }
+      ];
+
+      const sel = scenarios[Math.floor(Math.random() * scenarios.length)];
+
+      return {
+        topic: "Kompleks Cebirsel İfadeler",
+        text: `<strong>"${sel.sozel}"</strong> ifadesinin cebirsel karşılığı aşağıdakilerden hangisidir?`,
+        correct: sel.dogru,
+        wrongs: sel.yanlislar
+      };
+    }
+   }
+  },
+  // 24. Örüntüler
+  {
+    topic: "Örüntüler",
+    gen() {
+    const types = ["artan", "azalan", "katli"];
+    const type = types[Math.floor(Math.random() * types.length)];
+    
+    let dizi = [];
+    let correct;
+    let wrongs = new Set();
+
+    if (type === "artan") {
+      const ilk = rnd(2, 10);
+      const fark = rnd(3, 8);
+      // 4 terim oluştur: a, a+f, a+2f, a+3f
+      for (let i = 0; i < 4; i++) dizi.push(ilk + i * fark);
+      correct = ilk + 4 * fark; // 5. terim
+      
+      wrongs.add(correct + fark); 
+      wrongs.add(correct - 1);
+      wrongs.add(ilk + 3 * fark); // 4. terim tuzağı
+    } 
+    
+    else if (type === "azalan") {
+      const fark = rnd(3, 6);
+      const ilk = 50 + rnd(1, 10); // Yüksekten başla
+      for (let i = 0; i < 4; i++) dizi.push(ilk - i * fark);
+      correct = ilk - 4 * fark; // 5. terim
+      
+      wrongs.add(correct - fark);
+      wrongs.add(correct + 1);
+      wrongs.add(ilk - 3 * fark);
+    } 
+    
+    else { // katli (2 katına çıkan)
+      const ilk = rnd(2, 5);
+      for (let i = 0; i < 4; i++) dizi.push(ilk * Math.pow(2, i));
+      correct = ilk * Math.pow(2, 4); // 5. terim
+      
+      wrongs.add(correct / 2 + 2);
+      wrongs.add(correct * 2);
+      wrongs.add(correct - 2);
+    }
+
+    const diziMetni = dizi.join(", ");
+
+    return {
+      topic: this.topic,
+      text: `<strong>${diziMetni}, ...</strong><br><br>Yukarıda verilen sayı örüntüsünün kuralına göre <strong>5. terim</strong> kaç olmalıdır?`,
+      correct: String(correct),
+      wrongs: Array.from(wrongs).slice(0, 3).map(String)
+    };
+   }
+  },
+  // 25. Algoritma (İşlem Önceliği Çeldiricili)
+  {
+    topic: "Algoritma",
+    gen() {
+      const giris = rnd(20, 100); 
+    
+    const senaryolar = [
+      {
+        // Senaryo 1: Yüksek çarpanlı ve çok adımlı
+        text: (n) => `Başlangıç değeri ${n} olan algoritma: "Sayıyı 5 ile çarp, sonuca 25 ekle, çıkan sonucu 2'ye böl ve yazdır."`,
+        calc: (n) => (n * 5 + 25) / 2,
+        wrongs: (n) => [
+          n * 5 + 25 / 2,         // İşlem önceliği hatası (25/2 önce yapılır)
+          (n + 25) * 5 / 2,       // Toplama ve çarpma sırası karışıklığı
+          (n * 5 + 25)            // Bölme adımını unutma
+        ]
+      },
+      {
+        // Senaryo 2: Büyük farklar ve ters öncelik
+        text: (n) => `Başlangıç değeri ${n} olan algoritma: "Sayıdan 15 çıkar, sonucu 4 ile çarp, elde edilen sonuca 120 ekle ve yazdır."`,
+        calc: (n) => (n - 15) * 4 + 120,
+        wrongs: (n) => [
+          n - 15 * 4 + 120,       // Klasik öncelik tuzağı
+          (n - 15 + 120) * 4,     // Ekleme sırasını kaydırma
+          (n - 15) * 4            // Son eklemeyi unutma
+        ]
+      },
+      {
+        // Senaryo 3: Bölme ağırlıklı büyük sayılar
+        // (n çift seçilir ki tam sayı çıksın)
+        text: (n) => `Başlangıç değeri ${n * 2} olan algoritma: "Sayıyı 2'ye böl, sonuca 50 ekle, sonucu tekrar 2'ye böl ve yazdır."`,
+        calc: (n) => ((n * 2 / 2) + 50) / 2,
+        wrongs: (n) => [
+          (n * 2 / 2) + 50,       // Son bölmeyi unutma
+          (n * 2 + 50) / 2,       // İlk bölmeyi atlama
+          n * 2 / 2 + 50 / 2      // Parantez hatası
+        ]
+      },
+      {
+        // Senaryo 4: Katlamalı büyük çarpanlar
+        text: (n) => `Başlangıç değeri ${n} olan algoritma: "Sayının 10 katını al, sonuçtan 100 çıkar, kalanı 5'e böl ve yazdır."`,
+        calc: (n) => (n * 10 - 100) / 5,
+        wrongs: (n) => [
+          n * 10 - 100 / 5,       // İşlem önceliği tuzağı
+          (n - 100) * 10 / 5,     // Çıkarma ve çarpma sırasını karıştırma
+          n * 10 - 100            // Bölmeyi unutma
+        ]
+      },
+      {
+        // Senaryo 5: Üç basamaklı sonuç hedefli karmaşık toplama
+        text: (n) => `Başlangıç değeri ${n} olan algoritma: "Sayıya 40 ekle, sonucun 3 katını al, elde edilen sayıdan 60 çıkar ve yazdır."`,
+        calc: (n) => (n + 40) * 3 - 60,
+        wrongs: (n) => [
+          n + 40 * 3 - 60,        // Standart işlem önceliği hatası
+          (n + 40 - 60) * 3,      // Çıkarma sırasını öne çekme
+          (n + 40) * 3            // Son çıkarmayı unutma
+        ]
+      }
+    ];
+
+    const s = senaryolar[rnd(0, senaryolar.length - 1)];
+    const correct = s.calc(giris);
+    
+    // Yanlış cevapları filtrele ve benzersiz yap
+    let wrongs = s.wrongs(giris)
+      .map(v => Math.floor(v)) 
+      .filter(v => v !== correct);
+
+    // Çeldirici sayısı 3'ten azsa rastgele tamamla
+    while (wrongs.length < 3) {
+      const randomWrong = correct + rnd(10, 50) * (rnd(0, 1) === 0 ? 1 : -1);
+      if (randomWrong !== correct && !wrongs.includes(randomWrong)) {
+        wrongs.push(randomWrong);
+      }
+    }
+
+    return {
+      topic: this.topic,
+      text: `${s.text(giris)} Buna göre ekrandaki çıktı kaçtır?`,
+      correct: String(correct),
+      wrongs: wrongs.slice(0, 3).map(String)
       };
     }
   },
 
-  // ─── 20. Tam Sayılar ───
+  // ─────────────────────────────────────────────────────────────────
+  // 7. Tema: Geometrik Nicelikler
+  // ─────────────────────────────────────────────────────────────────
+
+  // 26. Alan Ölçme Birimleri
   {
-    topic:"Tam Sayılar",
-    gen(){
-      const qs = [
-        {t:"Aşağıdaki tam sayılardan hangisi <strong>en küçüktür</strong>?", c:"-8", w:["-2","0","3"]},
-        {t:"Aşağıdaki tam sayılardan hangisi <strong>en büyüktür</strong>?", c:"-1", w:["-5","-10","-3"]},
-        {t:"<strong>-4 < ? < 2</strong> sıralamasında soru işareti yerine hangisi <u>gelemez</u>?", c:"3", w:["-3","0","1"]},
-        {t:"Hava sıcaklığı sıfırın altında 5 derece ise sayıyla nasıl gösterilir?", c:"-5", w:["+5","0","|-5|"]},
-        {t:"Deniz seviyesinin 15 metre altı hangi tam sayıyla ifade edilir?", c:"-15", w:["+15","0","15"]},
-        {t:"Aşağıdaki sayılardan hangisi sayı doğrusunda 0'a daha yakındır?", c:"-2", w:["3","-5","4"]}
-      ];
-      const q = pick(qs);
-      return {topic:this.topic, text:q.t, correct:q.c, wrongs:q.w};
+    topic: "Alan Ölçme Birimleri",
+    gen() {
+    const units = [
+      { name: "km²", val: 1000000000000 },
+      { name: "hm²", val: 10000000000 },
+      { name: "dam²", val: 100000000 },
+      { name: "m²", val: 1000000 },
+      { name: "dm²", val: 10000 },
+      { name: "cm²", val: 100 },
+      { name: "mm²", val: 1 }
+    ];
+
+    // Rastgele iki farklı birim seç (Birimler arası farkın çok uçurum olmamasını sağlamak için yakın seçilebilir)
+    const fromIdx = Math.floor(Math.random() * units.length);
+    let toIdx;
+    do {
+      toIdx = Math.floor(Math.random() * units.length);
+    } while (Math.abs(fromIdx - toIdx) > 3 || fromIdx === toIdx); // En fazla 3 basamak fark olsun (sayıların okunabilirliği için)
+
+    const fromUnit = units[fromIdx];
+    const toUnit = units[toIdx];
+
+    // Başlangıç değerini belirle
+    const baseValue = rnd(1, 50); 
+    
+    // Dönüşüm hesabı: (Değer * KaynakBirimDeğeri) / HedefBirimDeğeri
+    const correctValue = (baseValue * fromUnit.val) / toUnit.val;
+
+    // Çeldiriciler: Uzunluk birimi sanıp 10'un kuvvetleriyle çarpma hatası
+    let wrongs = new Set();
+    const factors = [10, 1000, 0.1, 0.001];
+    
+    factors.forEach(f => {
+      let w = correctValue * f;
+      if (w !== correctValue && w > 0) {
+        wrongs.add(w < 1 ? w.toFixed(4).replace(/\.?0+$/, "") : w.toString());
+      }
+    });
+
+    // Eğer yeterli yanlış yoksa sıfır hatası ekle
+    while (wrongs.size < 3) {
+      wrongs.add((correctValue * 100).toString());
     }
+
+    const formatNum = (num) => num.toString().replace('.', ',');
+
+    return {
+      topic: this.topic,
+      text: `<strong>${formatNum(baseValue)} ${fromUnit.name}</strong> kaç <strong>${toUnit.name}</strong> eder?`,
+      correct: formatNum(correctValue),
+      wrongs: Array.from(wrongs).slice(0, 3).map(formatNum)
+    };
+   }
+  },
+  // 27. Paralelkenar ve Üçgen Alanı
+  {
+    topic: "Paralelkenar ve Üçgen Alanı",
+    gen() {
+    const shapes = ["kare", "dikdörtgen", "paralelkenar", "üçgen"];
+    const shape = shapes[Math.floor(Math.random() * shapes.length)];
+    
+    let text = "";
+    let correct;
+    let wrongs = new Set();
+
+    if (shape === "kare") {
+      const a = rnd(5, 15);
+      correct = a * a;
+      text = `Bir kenar uzunluğu <strong>${a} cm</strong> olan bir <strong>karenin</strong> alanı kaç cm²'dir?`;
+      wrongs.add(a * 4); // Çevre tuzağı
+      wrongs.add(a * 2);
+    } 
+    else if (shape === "dikdörtgen") {
+      const a = rnd(6, 15);
+      const b = rnd(4, 10);
+      correct = a * b;
+      text = `Uzun kenarı <strong>${a} cm</strong> ve kısa kenarı <strong>${b} cm</strong> olan bir <strong>dikdörtgenin</strong> alanı kaç cm²'dir?`;
+      wrongs.add((a + b) * 2); // Çevre tuzağı
+      wrongs.add(a + b);
+      wrongs.add(Math.floor((a * b) / 2)); // Üçgen alanı tuzağı
+    } 
+    else if (shape === "paralelkenar") {
+      const taban = rnd(8, 20);
+      const yukseklik = rnd(5, 12);
+      correct = taban * yukseklik;
+      text = `Taban uzunluğu <strong>${taban} cm</strong> ve bu tabana ait yüksekliği <strong>${yukseklik} cm</strong> olan bir <strong>paralelkenarın</strong> alanı kaç cm²'dir?`;
+      wrongs.add(Math.floor((taban * yukseklik) / 2)); // Üçgen alanı tuzağı (2'ye bölme)
+      wrongs.add(taban + yukseklik);
+      wrongs.add((taban + yukseklik) * 2);
+    } 
+    else { // üçgen
+      const taban = rnd(10, 24);
+      const yukseklik = rnd(6, 16);
+      correct = (taban * yukseklik) / 2;
+      text = `Taban uzunluğu <strong>${taban} cm</strong> ve bu tabana ait yüksekliği <strong>${yukseklik} cm</strong> olan bir <strong>üçgenin</strong> alanı kaç cm²'dir?`;
+      wrongs.add(taban * yukseklik); // 2'ye bölmeyi unutma tuzağı
+      wrongs.add(taban + yukseklik);
+      wrongs.add(Math.floor(correct + 10));
+    }
+
+    // Set kontrolü ile yanlış şıkları temizle ve doldur
+    while (wrongs.size < 3) {
+      let cand = correct + rnd(5, 15);
+      if (cand !== correct) wrongs.add(cand);
+    }
+
+    return {
+      topic: this.topic,
+      text: text,
+      correct: String(correct),
+      wrongs: Array.from(wrongs).slice(0, 3).map(String)
+    };
+   }
+  },
+  // 29. Çember ve Çap İlişkisi
+  {
+    topic: "Çember ve Çap",
+    gen() {
+      const r = rnd(5, 25);
+      const correct = 2 * r;
+      
+      // Çeldiriciler: Çevre hesabı (pi=3 ile), Yarıçapı aynen bırakma, karesini alma
+      const wrongs = [r, 3 * r * 2, r * r].filter(w => w !== correct);
+      
+      return {
+        topic: this.topic,
+        text: `Yarıçapı (r) <strong>${r} cm</strong> olan bir çemberin <strong>çapı (R)</strong> kaç cm'dir?`,
+        correct: String(correct),
+        wrongs: wrongs.slice(0, 3).map(String)
+      };
+    }
+  },
+  // 30. Gerçek Yaşam Problemleri (Çember Çevresi)
+  {
+    topic: "Çember Problemleri",
+    gen() {
+    const types = ["cevre_hesaplama", "tur_sayisi_yol"];
+    const type = types[Math.floor(Math.random() * types.length)];
+
+    if (type === "cevre_hesaplama") {
+      // Temel çevre sorusu: r verip çevre isteme
+      const r = rnd(5, 20); // Yarıçap
+      const correct = 2 * 3 * r; // 2 * pi * r
+      
+      let wrongs = new Set();
+      wrongs.add(3 * r); // 2'yi unutma hatası
+      wrongs.add(2 * 3 + r); // Çarpma yerine toplama hatası
+      wrongs.add(r * r); // Alanla karıştırma tuzağı
+      
+      return {
+        topic: this.topic,
+        text: `Yarıçapı <strong>${r} cm</strong> olan bir çemberin çevre uzunluğu kaç cm'dir? (π = 3 alınız.)`,
+        correct: String(correct),
+        wrongs: Array.from(wrongs).slice(0, 3).map(String)
+      };
+    } 
+    else {
+      // Tekerlek tur sayısı ve yol sorusu
+      const r = [10, 20, 25, 50][rnd(0, 3)]; // Yarıçap (cm)
+      const tur = rnd(5, 20) * 10; // Tur sayısı (50, 60... 200)
+      
+      const birTur = 2 * 3 * r; // Bir turda alınan yol (cm)
+      const toplamYolCm = birTur * tur;
+      const toplamYolMetre = toplamYolCm / 100; // Metreye çevrim
+      
+      const correct = toplamYolMetre;
+
+      let wrongs = new Set();
+      wrongs.add(toplamYolCm); // Metreye çevirmeyi unutma tuzağı!
+      wrongs.add(toplamYolMetre / 2); // 2 * pi * r yerine pi * r kullanma hatası
+      wrongs.add(toplamYolMetre * 2);
+
+      return {
+        topic: "Çemberde Yol Problemleri",
+        text: `Yarıçapı <strong>${r} cm</strong> olan bir bisiklet tekerleği <strong>${tur} tam tur</strong> attığında toplam kaç <strong>metre</strong> yol alır? (π = 3 alınız.)`,
+        correct: String(correct),
+        wrongs: Array.from(wrongs).slice(0, 3).map(String)
+      };
+    }
+   }
+  },
+  // 31. Merkez Açı ve Yay Uzunluğu
+  {
+    topic: "Merkez Açı ve Yay",
+    gen() {
+    // Zihinden işlem için kolay sayılar (2, 4, 6 veya 10'un katları)
+    const r = [10, 20, 30, 40, 60][rnd(0, 4)];
+    const aci = Math.random() > 0.5 ? 90 : 180;
+    
+    const tamCevre = 2 * 3 * r; // π = 3
+    
+    // 180 derece yarısı, 90 derece dörtte biridir
+    const correct = aci === 180 ? tamCevre / 2 : tamCevre / 4;
+    
+    const oranIsmi = aci === 180 ? "yarım" : "çeyrek";
+    
+    let wrongs = new Set();
+    wrongs.add(tamCevre); // Tüm çevre hatası
+    wrongs.add(aci === 180 ? tamCevre / 4 : tamCevre / 2); // Oranları karıştırma hatası
+    wrongs.add(r * 3); // 2*pi*r yerine pi*r kullanma hatası
+    
+    // Set'ten diziye çevirip eksik varsa doldurma
+    while (wrongs.size < 3) {
+      wrongs.add(correct + 10);
+    }
+
+    return {
+      topic: this.topic,
+      text: `Yarıçapı <strong>${r} cm</strong> olan bir çemberde, merkez açısı <strong>${aci}°</strong> (yani ${oranIsmi} çember) olan yayın uzunluğu kaç cm'dir? (π = 3 alınız.)`,
+      correct: String(correct),
+      wrongs: Array.from(wrongs).slice(0, 3).map(String)
+    };
+   }
   }
+ ]
 ];
 
 // GCD / LCM helpers
@@ -1489,35 +2649,59 @@ function computeLCM(a,b){ return (a*b)/computeGCD(a,b); }
 //  QUESTION ENGINE
 // ══════════════════════════════════════════════
 function getQuestion(){
-  // Avoid recent topics
-  let pool = GENS.filter(g=>!recentTopics.includes(g.topic));
-  if(pool.length<3){ recentTopics=[]; pool=GENS; }
-  const gen = pick(pool);
-  recentTopics.push(gen.topic);
-  if(recentTopics.length>6) recentTopics.shift();
+  // 1. AŞAMA: Önce rastgele bir Tema Grubu seç 
+  // (Böylece 15 soruluk tema ile 3 soruluk temanın gelme ihtimali eşitlenir)
+  const secilenTemaGrubu = pick(GENS); 
 
-  let data;
-  for(let i=0;i<10;i++){
-    try{ data=gen.gen(); if(data) break; } catch(e){ console.warn('gen err',e); }
+  // 2. AŞAMA: O temanın içindeki sorulardan, yakın zamanda ÇIKMAYANLARI filtrele
+  let pool = secilenTemaGrubu.filter(g => !recentTopics.includes(g.topic));
+
+  // Eğer seçilen temadaki tüm konular yakın zamanda çıktıysa (havuz boşaldıysa),
+  // o tema için recentTopics filtresini es geç ve havuzu baştan doldur.
+  // (Not: Temalara böldüğümüz için 'pool.length < 3' yerine '=== 0' kullanmak daha güvenli, 
+  // çünkü bazı temalarda zaten sadece 1-2 soru çeşidi olabilir).
+  if(pool.length === 0){ 
+    recentTopics = []; 
+    pool = secilenTemaGrubu; 
   }
-  if(!data){ data=GENS[0].gen(); }
+
+  // Havuzdan rastgele bir soru jeneratörü seç
+  const gen = pick(pool);
+  
+  // Konuyu geçmişe (recentTopics) ekle
+  recentTopics.push(gen.topic);
+  if(recentTopics.length > 6) recentTopics.shift();
+
+  // --- BURADAN AŞAĞISI ORİJİNAL KODUNLA AYNI ---
+  let data;
+  for(let i=0; i<10; i++){
+    try { 
+      data = gen.gen(); 
+      if(data) break; 
+    } catch(e) { 
+      console.warn('gen err', e); 
+    }
+  }
+  
+  // Fallback: Hata olursa 0. temanın 0. sorusunu getir (Çökmeyi önlemek için GENS[0][0] yapıldı)
+  if(!data){ data = GENS[0][0].gen(); }
 
   // Build options array (4 unique, shuffled)
   const optSet = new Set([String(data.correct)]);
   for(const w of (data.wrongs||[])){
-    if(optSet.size>=4) break;
-    const ws=String(w);
-    if(ws!==String(data.correct)) optSet.add(ws);
+    if(optSet.size >= 4) break;
+    const ws = String(w);
+    if(ws !== String(data.correct)) optSet.add(ws);
   }
-  while(optSet.size<4){
-    const extra = String(parseInt(data.correct||0)+rnd(1,9));
+  while(optSet.size < 4){
+    const extra = String(parseInt(data.correct||0) + rnd(1,9));
     optSet.add(extra);
   }
 
   return {
     topic: data.topic,
     text:  data.text,
-    answer:String(data.correct),
+    answer: String(data.correct),
     opts:  shuffle([...optSet])
   };
 }
